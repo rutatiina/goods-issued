@@ -1,0 +1,28 @@
+{
+    "name": "rutatiina/goods-issued",
+    "description": "Package to Manage goods issued",
+    "type": "laravel",
+    "authors": [
+        {
+            "name": "Rutatiina Gilbert",
+            "email": "rutatiina@ruginem.org"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "rutatiina/contact": "dev-main",
+        "rutatiina/item": "dev-main"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rutatiina\\GoodsIssued\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Rutatiina\\GoodsIssued\\GoodsIssuedServiceProvider"
+            ]
+        }
+    }
+}
