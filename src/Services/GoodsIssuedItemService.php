@@ -21,12 +21,11 @@ class GoodsIssuedItemService
         //Save the items >> $data['items']
         foreach ($data['items'] as &$item)
         {
-            $item['goods_delivered_id'] = $data['id'];
+            $item['goods_issued_id'] = $data['id'];
 
-            $itemTaxes = (is_array($item['taxes'])) ? $item['taxes'] : [] ;
             unset($item['taxes']);
 
-            $itemModel = GoodsIssuedItem::create($item);
+            GoodsIssuedItem::create($item);
 
         }
         unset($item);

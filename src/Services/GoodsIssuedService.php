@@ -133,8 +133,7 @@ class GoodsIssuedService
             //update the status of the txn
             if ($approval)
             {
-                $Txn->status = $data['status'];
-                $Txn->balances_where_updated = 1;
+                $Txn->status = 'approved';
                 $Txn->save();
             }
 
@@ -241,8 +240,7 @@ class GoodsIssuedService
             //update the status of the txn
             if ($approval)
             {
-                $Txn->status = $data['status'];
-                $Txn->balances_where_updated = 1;
+                $Txn->status = 'approved';
                 $Txn->save();
             }
 
@@ -296,12 +294,6 @@ class GoodsIssuedService
             $Txn->items()->delete();
             $Txn->item_taxes()->delete();
             $Txn->comments()->delete();
-
-            //reverse the account balances
-            AccountBalanceUpdateService::doubleEntry($Txn, true);
-
-            //reverse the contact balances
-            ContactBalanceUpdateService::doubleEntry($Txn, true);
 
             $Txn->delete();
 
@@ -409,7 +401,6 @@ class GoodsIssuedService
             if ($approval)
             {
                 $Txn->status = 'approved';
-                $Txn->balances_where_updated = 1;
                 $Txn->save();
             }
 
