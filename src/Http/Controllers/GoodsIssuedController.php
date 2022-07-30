@@ -60,7 +60,7 @@ class GoodsIssuedController extends Controller
 
         //return $sort_by;
 
-        $txns = GoodsIssued::latest()->paginate($per_page);
+        $txns = GoodsIssued::with('items')->latest()->paginate($per_page);
 
         return [
             'tableData' => $txns
