@@ -128,7 +128,7 @@ class GoodsIssuedValidateService
                 'rate' => $item['rate'],
                 'total' => $item['total'],
                 'taxable_amount' => $itemTaxableAmount,
-                'units' => $requestInstance->input('items.'.$key.'.units', null),
+                'units' => ($item['quantity']*$itemModel['units']), //$requestInstance->input('items.'.$key.'.units', null),
                 'batch' => $requestInstance->input('items.'.$key.'.batch', null),
                 'expiry' => $requestInstance->input('items.'.$key.'.expiry', null),
                 'taxes' => $itemTaxes,
