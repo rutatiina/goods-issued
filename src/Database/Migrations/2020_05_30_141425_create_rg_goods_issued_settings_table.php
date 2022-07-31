@@ -34,10 +34,6 @@ class CreateRgGoodsIssuedSettingsTable extends Migration
             $table->unsignedBigInteger('minimum_number')->default(1)->nullable();
             $table->unsignedBigInteger('maximum_number')->nullable();
 
-            //double entry settings
-            $table->unsignedBigInteger('debit_financial_account_code')->nullable();
-            $table->unsignedBigInteger('credit_financial_account_code')->nullable();
-
         });
     }
 

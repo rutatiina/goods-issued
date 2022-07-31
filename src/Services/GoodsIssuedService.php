@@ -113,10 +113,8 @@ class GoodsIssuedService
             $Txn->contact_name = $data['contact_name'];
             $Txn->contact_address = $data['contact_address'];
             $Txn->reference = $data['reference'];
-            $Txn->total = $data['total'];
             $Txn->branch_id = $data['branch_id'];
             $Txn->store_id = $data['store_id'];
-            $Txn->status = $data['status'];
 
             $Txn->save();
 
@@ -192,38 +190,24 @@ class GoodsIssuedService
             }
 
             //Delete affected relations
-            $Txn->ledgers()->delete();
             $Txn->items()->delete();
-            $Txn->item_taxes()->delete();
             $Txn->comments()->delete();
 
             //reverse the account balances
             AccountBalanceUpdateService::doubleEntry($Txn->toArray(), true);
-
-            //reverse the contact balances
-            ContactBalanceUpdateService::doubleEntry($Txn->toArray(), true);
 
             $Txn->tenant_id = $data['tenant_id'];
             $Txn->created_by = Auth::id();
             $Txn->document_name = $data['document_name'];
             $Txn->number = $data['number'];
             $Txn->date = $data['date'];
-            $Txn->debit_financial_account_code = $data['debit_financial_account_code'];
             $Txn->contact_id = $data['contact_id'];
             $Txn->contact_name = $data['contact_name'];
             $Txn->contact_address = $data['contact_address'];
             $Txn->reference = $data['reference'];
-            $Txn->base_currency = $data['base_currency'];
-            $Txn->quote_currency = $data['quote_currency'];
-            $Txn->exchange_rate = $data['exchange_rate'];
-            $Txn->taxable_amount = $data['taxable_amount'];
-            $Txn->total = $data['total'];
             $Txn->branch_id = $data['branch_id'];
             $Txn->store_id = $data['store_id'];
-            $Txn->due_date = $data['due_date'];
             $Txn->contact_notes = $data['contact_notes'];
-            $Txn->terms_and_conditions = $data['terms_and_conditions'];
-            $Txn->status = $data['status'];
 
             $Txn->save();
 
@@ -290,9 +274,7 @@ class GoodsIssuedService
             }
 
             //Delete affected relations
-            $Txn->ledgers()->delete();
             $Txn->items()->delete();
-            $Txn->item_taxes()->delete();
             $Txn->comments()->delete();
 
             $Txn->delete();

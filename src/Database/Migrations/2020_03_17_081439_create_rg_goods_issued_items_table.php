@@ -27,19 +27,14 @@ class CreateRgGoodsIssuedItemsTable extends Migration
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
             $table->unsignedBigInteger('goods_issued_id');
-            $table->enum('type', ['item', 'contact', 'account', 'txn_type', 'txn', 'tax'])->nullable();
-            $table->unsignedBigInteger('type_id')->nullable();
+            $table->unsignedBigInteger('item_id')->nullable();
             $table->unsignedBigInteger('contact_id')->nullable();
             $table->string('name', 100);
             $table->string('description', 250)->nullable();
             $table->unsignedInteger('quantity');
-            $table->unsignedDecimal('rate', 20,5);
-            $table->unsignedBigInteger('tax_id')->nullable();
-            $table->unsignedDecimal('total', 20, 5);
             $table->unsignedInteger('units')->nullable();
             $table->string('batch', 100)->nullable();
             $table->date('expiry')->nullable();
-            $table->string('taxes', 100)->nullable();
 
         });
     }
