@@ -2,15 +2,16 @@
 
 namespace Rutatiina\GoodsIssued\Services;
 
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
+use Rutatiina\Tax\Models\Tax;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Rutatiina\GoodsIssued\Models\GoodsIssued;
+use Rutatiina\GoodsIssued\Models\GoodsIssuedSetting;
+use Rutatiina\GoodsIssued\Services\GoodsIssuedInventoryService;
 use Rutatiina\FinancialAccounting\Services\AccountBalanceUpdateService;
 use Rutatiina\FinancialAccounting\Services\ContactBalanceUpdateService;
-use Rutatiina\GoodsIssued\Models\GoodsIssuedSetting;
-use Rutatiina\Tax\Models\Tax;
 
 class GoodsIssuedService
 {
@@ -45,8 +46,7 @@ class GoodsIssuedService
         $taxes = Tax::all()->keyBy('code');
 
         $txn = GoodsIssued::findOrFail($id);
-        $txn->load('contact', 'items.taxes');
-        $txn->setAppends(['taxes']);
+        $txn->load('contact', 'items');
 
         $attributes = $txn->toArray();
 
@@ -126,7 +126,7 @@ class GoodsIssuedService
             GoodsIssuedItemService::store($data);
 
             //check status and update financial account and contact balances accordingly
-            $approval = GoodsIssuedApprovalService::run($data);
+            $approval = GoodsIssuedInventoryService::update($data);
 
             //update the status of the txn
             if ($approval)
@@ -189,12 +189,11 @@ class GoodsIssuedService
                 return false;
             }
 
+            GoodsIssuedInventoryService::reverse($Txn->toArray());
+
             //Delete affected relations
             $Txn->items()->delete();
             $Txn->comments()->delete();
-
-            //reverse the account balances
-            AccountBalanceUpdateService::doubleEntry($Txn->toArray(), true);
 
             $Txn->tenant_id = $data['tenant_id'];
             $Txn->created_by = Auth::id();
@@ -219,7 +218,7 @@ class GoodsIssuedService
             GoodsIssuedItemService::store($data);
 
             //check status and update financial account and contact balances accordingly
-            $approval = GoodsIssuedApprovalService::run($data);
+            $approval = GoodsIssuedInventoryService::update($data);
 
             //update the status of the txn
             if ($approval)
@@ -273,6 +272,8 @@ class GoodsIssuedService
                 return false;
             }
 
+            GoodsIssuedInventoryService::reverse($Txn->toArray());
+
             //Delete affected relations
             $Txn->items()->delete();
             $Txn->comments()->delete();
@@ -313,8 +314,7 @@ class GoodsIssuedService
         $taxes = Tax::all()->keyBy('code');
 
         $txn = GoodsIssued::findOrFail($id);
-        $txn->load('contact', 'items.taxes');
-        $txn->setAppends(['taxes']);
+        $txn->load('contact', 'items');
 
         $attributes = $txn->toArray();
 
@@ -361,7 +361,7 @@ class GoodsIssuedService
 
     public static function approve($id)
     {
-        $Txn = GoodsIssued::with(['ledgers'])->findOrFail($id);
+        $Txn = GoodsIssued::with(['items'])->findOrFail($id);
 
         if (!in_array($Txn->status, config('financial-accounting.approvable_status')))
         {
@@ -377,7 +377,7 @@ class GoodsIssuedService
         try
         {
             $data['status'] = 'approved';
-            $approval = GoodsIssuedApprovalService::run($data);
+            $approval = GoodsIssuedInventoryService::update($data);
 
             //update the status of the txn
             if ($approval)
