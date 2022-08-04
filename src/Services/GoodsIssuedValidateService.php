@@ -92,28 +92,10 @@ class GoodsIssuedValidateService
         $data['status'] = strtolower($requestInstance->input('status', null));
         $data['balances_where_updated'] = 0;
 
-
-        //set the transaction total to zero
-        $txnTotal = 0;
-        $taxableAmount = 0;
-
         //Formulate the DB ready items array
         $data['items'] = [];
         foreach ($requestInstance->items as $key => $item)
         {
-            $itemTaxes = $requestInstance->input('items.'.$key.'.taxes', []);
-
-            $txnTotal           += ($item['rate']*$item['quantity']);
-            $taxableAmount      += ($item['rate']*$item['quantity']);
-            $itemTaxableAmount   = ($item['rate']*$item['quantity']); //calculate the item taxable amount
-
-            foreach ($itemTaxes as $itemTax)
-            {
-                $txnTotal           += $itemTax['exclusive'];
-                $taxableAmount      -= $itemTax['inclusive'];
-                $itemTaxableAmount  -= $itemTax['inclusive']; //calculate the item taxable amount more by removing the inclusive amount
-            }
-
             //get the item
             $itemModel = Item::find($item['item_id']);
 
@@ -125,19 +107,13 @@ class GoodsIssuedValidateService
                 'name' => $item['name'],
                 'description' => $item['description'],
                 'quantity' => $item['quantity'],
-                'rate' => $item['rate'],
-                'total' => $item['total'],
-                'taxable_amount' => $itemTaxableAmount,
                 'units' => ($item['quantity']*$itemModel['units']), //$requestInstance->input('items.'.$key.'.units', null),
                 'batch' => $requestInstance->input('items.'.$key.'.batch', null),
                 'expiry' => $requestInstance->input('items.'.$key.'.expiry', null),
-                'taxes' => $itemTaxes,
+                'inventory_tracking' => $itemModel->inventory_tracking,
             ];
 
         }
-
-        $data['taxable_amount'] = $taxableAmount;
-        $data['total'] = $txnTotal;
 
         //Return the array of txns
         //print_r($data); exit;

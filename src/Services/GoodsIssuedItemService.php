@@ -23,8 +23,6 @@ class GoodsIssuedItemService
         {
             $item['goods_issued_id'] = $data['id'];
 
-            unset($item['taxes']);
-
             GoodsIssuedItem::create($item);
 
         }
