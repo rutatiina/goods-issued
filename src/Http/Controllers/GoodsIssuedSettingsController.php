@@ -18,10 +18,10 @@ class GoodsIssuedSettingsController extends Controller
 
     public function __construct()
     {
-		$this->middleware('permission:estimates.view');
-		$this->middleware('permission:estimates.create', ['only' => ['create','store']]);
-		$this->middleware('permission:estimates.update', ['only' => ['edit','update']]);
-		$this->middleware('permission:estimates.delete', ['only' => ['destroy']]);
+		// $this->middleware('permission:estimates.view');
+		// $this->middleware('permission:estimates.create', ['only' => ['create','store']]);
+		// $this->middleware('permission:estimates.update', ['only' => ['edit','update']]);
+		// $this->middleware('permission:estimates.delete', ['only' => ['destroy']]);
 	}
 
     public function index()
