@@ -290,4 +290,31 @@ class GoodsIssuedController extends Controller
 
         return $export;
     }
+
+    public function routes()
+    {
+        return [
+            'delete' => route('goods-issued.delete'),
+            'approve' => route('goods-issued.approve'),
+            'cancel' => route('goods-issued.cancel'),
+        ];
+    }
+
+    public function delete(Request $request)
+    {
+        if (GoodsIssuedService::destroyMany($request->ids))
+        {
+            return [
+                'status' => true,
+                'messages' => [count($request->ids) . ' Goods issued note(s) deleted.'],
+            ];
+        }
+        else
+        {
+            return [
+                'status' => false,
+                'messages' => GoodsIssuedService::$errors
+            ];
+        }
+    }
 }

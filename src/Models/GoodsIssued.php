@@ -56,9 +56,6 @@ class GoodsIssued extends Model
              $txn->comments()->each(function($row) {
                 $row->delete();
              });
-             $txn->ledgers()->each(function($row) {
-                $row->delete();
-             });
         });
 
     }
@@ -112,25 +109,10 @@ class GoodsIssued extends Model
         $f = new \NumberFormatter( locale_get_default(), \NumberFormatter::SPELLOUT );
         return ucfirst($f->format($this->total));
     }
-
-    public function debit_account()
-    {
-        return $this->hasOne('Rutatiina\FinancialAccounting\Models\Account', 'id', 'debit');
-    }
-
-    public function credit_account()
-    {
-        return $this->hasOne('Rutatiina\FinancialAccounting\Models\Account', 'id', 'credit');
-    }
-
+    
     public function items()
     {
         return $this->hasMany('Rutatiina\GoodsIssued\Models\GoodsIssuedItem', 'goods_issued_id')->orderBy('id', 'asc');
-    }
-
-    public function ledgers()
-    {
-        return $this->hasMany('Rutatiina\GoodsIssued\Models\GoodsIssuedLedger', 'goods_issued_id')->orderBy('id', 'asc');
     }
 
     public function comments()
@@ -141,11 +123,6 @@ class GoodsIssued extends Model
     public function contact()
     {
         return $this->hasOne('Rutatiina\Contact\Models\Contact', 'id', 'contact_id');
-    }
-
-    public function recurring()
-    {
-        return $this->hasOne('Rutatiina\GoodsIssued\Models\GoodsIssuedRecurring', 'goods_issued_id', 'id');
     }
 
 }

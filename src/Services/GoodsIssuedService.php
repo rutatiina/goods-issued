@@ -148,7 +148,11 @@ class GoodsIssuedService
             Log::critical($e);
 
             //print_r($e); exit;
-            if (App::environment('local'))
+            if (isset($e->errorInfo[1]) && $e->errorInfo[1] == 1690)
+            {
+                self::$errors[] = 'Oops: Item inventory / stock is not enough';
+            }
+            elseif (App::environment('local'))
             {
                 self::$errors[] = 'Error: Failed to save Goods Delivered to database.';
                 self::$errors[] = 'File: ' . $e->getFile();
@@ -157,6 +161,7 @@ class GoodsIssuedService
             }
             else
             {
+
                 self::$errors[] = 'Fatal Internal Error: Failed to save Goods Delivered to database. Please contact Admin';
             }
 
@@ -307,6 +312,15 @@ class GoodsIssuedService
 
             return false;
         }
+    }
+
+    public static function destroyMany($ids)
+    {
+        foreach($ids as $id)
+        {
+            if(!self::destroy($id)) return false;
+        }
+        return true;
     }
 
     public static function copy($id)
