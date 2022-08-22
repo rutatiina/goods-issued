@@ -266,7 +266,7 @@ class GoodsIssuedController extends Controller
         ]);
 
         foreach (array_reverse($request->ids) as $id) {
-            $txn = Transaction::transaction($id);
+            $txn = GoodsIssued::transaction($id);
 
             $txns->push([
                 $txn->date,
