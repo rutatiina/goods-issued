@@ -36,9 +36,9 @@ class GoodsIssuedItem extends Model
         static::addGlobalScope(new TenantIdScope);
     }
 
-    public function txn()
+    public function item()
     {
-        return $this->belongsTo('Rutatiina\FinancialAccounting\Models\Txn', 'txn_id');
+        return $this->belongsTo('Rutatiina\Item\Models\Item', 'item_id');
     }
 
 }
