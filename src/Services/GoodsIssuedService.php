@@ -53,9 +53,7 @@ class GoodsIssuedService
         //print_r($attributes); exit;
 
         $attributes['_method'] = 'PATCH';
-
-        $attributes['contact']['currency'] = $attributes['contact']['currency_and_exchange_rate'];
-        $attributes['contact']['currencies'] = $attributes['contact']['currencies_and_exchange_rates'];
+        $attributes['contact'] = ($attributes['contact']) ? $attributes['contact'] : json_decode('{}');
 
         $attributes['taxes'] = json_decode('{}');
 
@@ -73,11 +71,6 @@ class GoodsIssuedService
             $attributes['items'][$key]['selectedItem'] = $selectedItem; #required
             $attributes['items'][$key]['selectedTaxes'] = []; #required
             $attributes['items'][$key]['displayTotal'] = 0; #required
-
-            foreach ($item['taxes'] as $itemTax)
-            {
-                $attributes['items'][$key]['selectedTaxes'][] = $taxes[$itemTax['tax_code']];
-            }
 
             $attributes['items'][$key]['rate'] = floatval($item['rate']);
             $attributes['items'][$key]['quantity'] = floatval($item['quantity']);
@@ -186,13 +179,9 @@ class GoodsIssuedService
 
         try
         {
-            $Txn = GoodsIssued::with('items', 'ledgers')->findOrFail($data['id']);
+            $originalTxn = GoodsIssued::with('items', 'ledgers')->findOrFail($data['id']);
 
-            if ($Txn->status == 'approved')
-            {
-                self::$errors[] = 'Approved Transaction cannot be not be edited';
-                return false;
-            }
+            $Txn = $originalTxn->duplicate();
 
             GoodsIssuedInventoryService::reverse($Txn->toArray());
 
@@ -200,6 +189,7 @@ class GoodsIssuedService
             $Txn->items()->delete();
             $Txn->comments()->delete();
 
+            $Txn->parent_id = $originalTxn->id;
             $Txn->tenant_id = $data['tenant_id'];
             $Txn->created_by = Auth::id();
             $Txn->document_name = $data['document_name'];
@@ -231,6 +221,8 @@ class GoodsIssuedService
                 $Txn->status = 'approved';
                 $Txn->save();
             }
+
+            $originalTxn->update(['status' => 'edited']);
 
             DB::connection('tenant')->commit();
 
@@ -269,20 +261,13 @@ class GoodsIssuedService
 
         try
         {
-            $Txn = GoodsIssued::with('items', 'ledgers')->findOrFail($id);
-
-            if ($Txn->status == 'approved')
-            {
-                self::$errors[] = 'Approved Transaction cannot be not be deleted';
-                return false;
-            }
+            $Txn = GoodsIssued::with('items')->findOrFail($id);
 
             GoodsIssuedInventoryService::reverse($Txn->toArray());
 
             //Delete affected relations
             $Txn->items()->delete();
             $Txn->comments()->delete();
-
             $Txn->delete();
 
             DB::connection('tenant')->commit();

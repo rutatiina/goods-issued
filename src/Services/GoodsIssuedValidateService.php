@@ -22,14 +22,10 @@ class GoodsIssuedValidateService
         //validate the data
         $customMessages = [
             //'total.in' => "Item total is invalid:\nItem total = item rate x item quantity",
-
-            'items.*.taxes.*.code.required' => "Tax code is required",
-            'items.*.taxes.*.total.required' => "Tax total is required",
-            //'items.*.taxes.*.exclusive.required' => "Tax exclusive amount is required",
         ];
 
         $rules = [
-            'contact_id' => 'required|numeric',
+            'contact_id' => 'numeric|nullable',
             'date' => 'required|date',
             'base_currency' => 'required',
             'due_date' => 'date|nullable',
@@ -38,15 +34,8 @@ class GoodsIssuedValidateService
 
             'items' => 'required|array',
             'items.*.name' => 'required_without:item_id',
-            'items.*.rate' => 'required|numeric',
             'items.*.quantity' => 'required|numeric|gt:0',
-            //'items.*.total' => 'required|numeric|in:' . $itemTotal, //todo custom validator to check this
             'items.*.units' => 'numeric|nullable',
-            'items.*.taxes' => 'array|nullable',
-
-            'items.*.taxes.*.code' => 'required',
-            'items.*.taxes.*.total' => 'required|numeric',
-            //'items.*.taxes.*.exclusive' => 'required|numeric',
         ];
 
         $validator = Validator::make($requestInstance->all(), $rules, $customMessages);
@@ -62,7 +51,7 @@ class GoodsIssuedValidateService
         $settings = GoodsIssuedSetting::firstOrFail();
         //Log::info($this->settings);
 
-        $contact = Contact::findOrFail($requestInstance->contact_id);
+        $contact = Contact::find($requestInstance->contact_id);
 
 
         $data['id'] = $requestInstance->input('id', null); //for updating the id will always be posted
@@ -77,8 +66,8 @@ class GoodsIssuedValidateService
         $data['number_postfix'] = $settings->number_postfix;
         $data['date'] = $requestInstance->input('date');
         $data['contact_id'] = $requestInstance->contact_id;
-        $data['contact_name'] = $contact->name;
-        $data['contact_address'] = trim($contact->shipping_address_street1 . ' ' . $contact->shipping_address_street2);
+        $data['contact_name'] = optional($contact)->name;
+        $data['contact_address'] = trim(optional($contact)->shipping_address_street1 . ' ' . optional($contact)->shipping_address_street2);
         $data['reference'] = $requestInstance->input('reference', null);
         $data['base_currency'] =  $requestInstance->input('base_currency');
         $data['quote_currency'] =  $requestInstance->input('quote_currency', $data['base_currency']);
