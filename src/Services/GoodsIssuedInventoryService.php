@@ -2,6 +2,7 @@
 
 namespace Rutatiina\GoodsIssued\Services;
 
+use Rutatiina\Item\Models\Item;
 use Rutatiina\Inventory\Models\Inventory;
 use Rutatiina\FinancialAccounting\Services\AccountBalanceUpdateService;
 use Rutatiina\FinancialAccounting\Services\ContactBalanceUpdateService;
@@ -71,15 +72,23 @@ class GoodsIssuedInventoryService
 
     public static function update($data)
     {
-        if ($data['status'] != 'approved')
-        {
-            //can only update balances if status is approved
-            return false;
-        }
+        if ($data['status'] != 'approved') return false; //can only update balances if status is approved
         
         //Update the inventory summary
         foreach ($data['items'] as &$item)
         {
+            if (!isset($item['inventory_tracking']))
+            {
+                if(is_numeric($item['item_id']))
+                {
+                    $item['inventory_tracking'] = optional(Item::find($item['item_id']))->inventory_tracking;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            
             if ($item['inventory_tracking'] == 0) continue;
 
             $inventory = self::record($data, $item);
@@ -98,22 +107,30 @@ class GoodsIssuedInventoryService
     
     public static function reverse($data)
     {
-        if ($data['status'] != 'approved')
-        {
-            //can only update balances if status is approved
-            return false;
-        }
+        if ($data['status'] != 'approved') return false; //can only update balances if status is approved
         
         //Update the inventory summary
         foreach ($data['items'] as &$item)
         {
+            if (!isset($item['inventory_tracking']))
+            {
+                if(is_numeric($item['item_id']))
+                {
+                    $item['inventory_tracking'] = optional(Item::find($item['item_id']))->inventory_tracking;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+
             if ($item['inventory_tracking'] == 0) continue;
             
             $inventory = self::record($data, $item);
 
             //increase the 
-            $inventory->increment('units_issued', $item['units']);
-            $inventory->decrement('units_available', $item['units']);
+            $inventory->decrement('units_issued', $item['units']);
+            $inventory->increment('units_available', $item['units']);
 
         }
 

@@ -50,7 +50,7 @@ class Update
 
         if ($Txn->status == 'Approved')
         {
-            $this->errors[] = 'Approved Transaction cannot be not be edited';
+            $this->errors[] = 'Approved goods issued note cannot be not be edited';
             return false;
         }
 

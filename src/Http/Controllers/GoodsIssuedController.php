@@ -88,7 +88,7 @@ class GoodsIssuedController extends Controller
 
         $txnAttributes['number'] = $this->nextNumber();
 
-        $txnAttributes['status'] = 'Approved';
+        $txnAttributes['status'] = 'approved';
         $txnAttributes['contact_id'] = '';
         $txnAttributes['contact'] = json_decode('{"currencies":[]}'); #required
         $txnAttributes['date'] = date('Y-m-d');
@@ -216,20 +216,20 @@ class GoodsIssuedController extends Controller
 
     public function approve($id)
     {
-        $approve = GoodsIssuedService::approve($id);
-
-        if ($approve == false)
+        if (GoodsIssuedService::approve($id))
+        {
+            return [
+                'status' => true,
+                'messages' => ['Goods issued note Approved'],
+            ];
+        }
+        else
         {
             return [
                 'status' => false,
                 'messages' => GoodsIssuedService::$errors
             ];
-        }
-
-        return [
-            'status' => true,
-            'messages' => ['Goods issued note Approved'],
-        ];
+        } 
     }
 
     public function copy($id)
@@ -295,7 +295,6 @@ class GoodsIssuedController extends Controller
     {
         return [
             'delete' => route('goods-issued.delete'),
-            'approve' => route('goods-issued.approve'),
             'cancel' => route('goods-issued.cancel'),
         ];
     }

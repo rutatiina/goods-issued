@@ -63,7 +63,7 @@ class GoodsIssuedService
                 'id' => $item['item_id'],
                 'name' => $item['name'],
                 'description' => $item['description'],
-                'rate' => $item['rate'],
+                'rate' => 0,
                 'tax_method' => 'inclusive',
                 'account_type' => null,
             ];
@@ -72,10 +72,10 @@ class GoodsIssuedService
             $attributes['items'][$key]['selectedTaxes'] = []; #required
             $attributes['items'][$key]['displayTotal'] = 0; #required
 
-            $attributes['items'][$key]['rate'] = floatval($item['rate']);
+            $attributes['items'][$key]['rate'] = 0;
             $attributes['items'][$key]['quantity'] = floatval($item['quantity']);
-            $attributes['items'][$key]['total'] = floatval($item['total']);
-            $attributes['items'][$key]['displayTotal'] = $item['total']; #required
+            $attributes['items'][$key]['total'] = 0;
+            $attributes['items'][$key]['displayTotal'] = 0; #required
         };
 
         return $attributes;
@@ -108,6 +108,7 @@ class GoodsIssuedService
             $Txn->reference = $data['reference'];
             $Txn->branch_id = $data['branch_id'];
             $Txn->store_id = $data['store_id'];
+            $Txn->status = $data['status'];
 
             $Txn->save();
 
@@ -119,14 +120,9 @@ class GoodsIssuedService
             GoodsIssuedItemService::store($data);
 
             //check status and update financial account and contact balances accordingly
-            $approval = GoodsIssuedInventoryService::update($data);
-
             //update the status of the txn
-            if ($approval)
-            {
-                $Txn->status = 'approved';
-                $Txn->save();
-            }
+            $Txn->status = (GoodsIssuedInventoryService::update($data)) ? 'approved' : 'draft';
+            $Txn->save();
 
             DB::connection('tenant')->commit();
 
@@ -179,7 +175,7 @@ class GoodsIssuedService
 
         try
         {
-            $originalTxn = GoodsIssued::with('items', 'ledgers')->findOrFail($data['id']);
+            $originalTxn = GoodsIssued::with('items')->findOrFail($data['id']);
 
             $Txn = $originalTxn->duplicate();
 
@@ -262,6 +258,12 @@ class GoodsIssuedService
         try
         {
             $Txn = GoodsIssued::with('items')->findOrFail($id);
+            
+            $Txn->items->map(function ($item) {
+                $item->inventory_tracking = ($item->item) ? $item->item->inventory_tracking : 0;
+                return $item;
+            });
+            unset($item);
 
             GoodsIssuedInventoryService::reverse($Txn->toArray());
 
@@ -376,21 +378,15 @@ class GoodsIssuedService
         try
         {
             $data['status'] = 'approved';
-            $approval = GoodsIssuedInventoryService::update($data);
-
-            //update the status of the txn
-            if ($approval)
-            {
-                $Txn->status = 'approved';
-                $Txn->save();
-            }
+            $Txn->status = (GoodsIssuedInventoryService::update($data)) ? 'approved' : 'draft';
+            $Txn->save();
 
             DB::connection('tenant')->commit();
 
             return true;
 
         }
-        catch (\Exception $e)
+        catch (\Throwable $e)
         {
             DB::connection('tenant')->rollBack();
             //print_r($e); exit;
