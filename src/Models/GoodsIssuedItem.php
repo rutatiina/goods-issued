@@ -28,6 +28,10 @@ class GoodsIssuedItem extends Model
         'inventory_tracking',
     ];
 
+    protected $casts = [
+        'item_id' => 'integer',
+    ];
+
     /**
      * The "booting" method of the model.
      *
