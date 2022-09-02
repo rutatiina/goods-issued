@@ -24,6 +24,10 @@ class GoodsIssuedItem extends Model
 
     protected $guarded = ['id'];
 
+    protected $appends = [
+        'inventory_tracking',
+    ];
+
     /**
      * The "booting" method of the model.
      *
@@ -39,6 +43,11 @@ class GoodsIssuedItem extends Model
     public function item()
     {
         return $this->belongsTo('Rutatiina\Item\Models\Item', 'item_id');
+    }
+
+    public function getInventoryTrackingAttribute()
+    {
+        return optional($this->item)->inventory_tracking;
     }
 
 }
