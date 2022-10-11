@@ -316,4 +316,22 @@ class GoodsIssuedController extends Controller
             ];
         }
     }
+
+    public function cancel(Request $request)
+    {
+        if (GoodsIssuedService::cancelMany($request->ids))
+        {
+            return [
+                'status' => true,
+                'messages' => [count($request->ids) . ' Goods issued note(s) canceled.'],
+            ];
+        }
+        else
+        {
+            return [
+                'status' => false,
+                'messages' => GoodsIssuedService::$errors
+            ];
+        }
+    }
 }

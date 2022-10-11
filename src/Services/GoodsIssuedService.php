@@ -259,12 +259,6 @@ class GoodsIssuedService
         try
         {
             $Txn = GoodsIssued::with('items')->findOrFail($id);
-            
-            $Txn->items->map(function ($item) {
-                $item->inventory_tracking = ($item->item) ? $item->item->inventory_tracking : 0;
-                return $item;
-            });
-            unset($item);
 
             GoodsIssuedInventoryService::reverse($Txn->toArray());
 
@@ -302,11 +296,63 @@ class GoodsIssuedService
         }
     }
 
+    public static function cancel($id)
+    {
+        //start database transaction
+        DB::connection('tenant')->beginTransaction();
+
+        try
+        {
+            $Txn = GoodsIssued::with('items')->findOrFail($id);
+
+            GoodsIssuedInventoryService::reverse($Txn->toArray());
+
+            $Txn->canceled = 1;
+            $Txn->save();
+
+            DB::connection('tenant')->commit();
+
+            return true;
+
+        }
+        catch (\Throwable $e)
+        {
+            DB::connection('tenant')->rollBack();
+
+            Log::critical('Fatal Internal Error: Failed to cancel GoodsIssued from database');
+            Log::critical($e);
+
+            //print_r($e); exit;
+            if (App::environment('local'))
+            {
+                self::$errors[] = 'Error: Failed to cancel GoodsIssued from database.';
+                self::$errors[] = 'File: ' . $e->getFile();
+                self::$errors[] = 'Line: ' . $e->getLine();
+                self::$errors[] = 'Message: ' . $e->getMessage();
+            }
+            else
+            {
+                self::$errors[] = 'Fatal Internal Error: Failed to cancel GoodsIssued from database. Please contact Admin';
+            }
+
+            return false;
+        }
+    }
+
     public static function destroyMany($ids)
     {
         foreach($ids as $id)
         {
             if(!self::destroy($id)) return false;
+        }
+        return true;
+    }
+
+    public static function cancelMany($ids)
+    {
+        foreach($ids as $id)
+        {
+            if(!self::cancel($id)) return false;
         }
         return true;
     }
