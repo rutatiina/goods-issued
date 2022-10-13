@@ -32,6 +32,7 @@ class GoodsIssued extends Model
 
     protected $casts = [
         'contact_id' => 'integer',
+        'canceled' => 'integer',
     ];
 
     protected $cloneable_relations = ['items', 'comments'];
