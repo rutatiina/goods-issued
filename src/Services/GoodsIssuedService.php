@@ -29,7 +29,7 @@ class GoodsIssuedService
             'document_name' => 'Goods Issued Note',
             'document_type' => 'inventory',
             //'debit_financial_account_code' => 66, //sales person inventory
-            //'credit_financial_account_code' => 130500, //Other Inventory
+            //'credit_financial_account_code' => 130500, //Inventory
         ]);
     }
 
