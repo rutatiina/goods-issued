@@ -24,13 +24,16 @@ class GoodsIssuedService
 
     public static function settings()
     {
-        return GoodsIssuedSetting::firstOrCreate([
-            'tenant_id' => session('tenant_id'),
-            'document_name' => 'Goods Issued Note',
-            'document_type' => 'inventory',
-            //'debit_financial_account_code' => 66, //sales person inventory
-            //'credit_financial_account_code' => 130500, //Inventory
-        ]);
+        return GoodsIssuedSetting::firstOrCreate(
+            ['tenant_id' => session('tenant_id')],
+            [
+                'document_name' => 'Goods Issued Note',
+                'document_type' => 'inventory',
+                'minimum_number_length' => 5,
+                //'debit_financial_account_code' => 66, //sales person inventory
+                //'credit_financial_account_code' => 130500, //Inventory
+            ]
+        );
     }
 
     public static function nextNumber()
